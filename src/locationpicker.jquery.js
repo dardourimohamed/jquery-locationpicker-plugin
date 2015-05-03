@@ -151,24 +151,24 @@
         if (!inputBinding) return;
         var currentLocation = GmUtility.locationFromLatLng(gmapContext.location);
         if (inputBinding.latitudeInput) {
-            inputBinding.latitudeInput.val(currentLocation.latitude).change();
+            inputBinding.latitudeInput.val(currentLocation.latitude).trigger("change", true);
         }
         if (inputBinding.longitudeInput) {
-            inputBinding.longitudeInput.val(currentLocation.longitude).change();
+            inputBinding.longitudeInput.val(currentLocation.longitude).trigger("change", true);
         }
         if (inputBinding.radiusInput) {
-            inputBinding.radiusInput.val(gmapContext.radius).change();
+            inputBinding.radiusInput.val(gmapContext.radius).trigger("change", true);
         }
         if (inputBinding.locationNameInput) {
-            inputBinding.locationNameInput.val(gmapContext.locationName).change();
+            inputBinding.locationNameInput.val(gmapContext.locationName).trigger("change", true);
         }
     }
 
     function setupInputListenersInput(inputBinding, gmapContext) {
         if (inputBinding) {
             if (inputBinding.radiusInput){
-                inputBinding.radiusInput.on("change", function(e) {
-                    if (!e.originalEvent) { return }
+                inputBinding.radiusInput.on("change", function(e, isInternal) {
+                    if (isInternal) { return }
                     gmapContext.radius = $(this).val();
                     GmUtility.setPosition(gmapContext, gmapContext.location, function(context){
                         context.settings.onchanged.apply(gmapContext.domContainer,
@@ -193,12 +193,12 @@
                     });
                 });
                 if(gmapContext.settings.enableAutocompleteBlur) {
-                  inputBinding.locationNameInput.on("change", function(e) {
-                    if (!e.originalEvent) { return }
+                  inputBinding.locationNameInput.on("change", function(e, isInternal) {
+                    if (isInternal) { return }
                     blur = true;
                   });
-                  inputBinding.locationNameInput.on("blur", function(e) {
-                    if (!e.originalEvent) { return }
+                  inputBinding.locationNameInput.on("blur", function(e, isInternal) {
+                    if (isInternal) { return }
                     setTimeout(function() {
                         var address = $(inputBinding.locationNameInput).val();
                         if (address.length > 5 && blur) {
@@ -218,21 +218,26 @@
                 }
             }
             if (inputBinding.latitudeInput) {
-                inputBinding.latitudeInput.on("change", function(e) {
-                    if (!e.originalEvent) { return }
+                inputBinding.latitudeInput.on("change", function(e, isInternal) {
+                    if (isInternal) { return }
                     GmUtility.setPosition(gmapContext, new google.maps.LatLng($(this).val(), gmapContext.location.lng()), function(context){
                         context.settings.onchanged.apply(gmapContext.domContainer,
                             [GmUtility.locationFromLatLng(context.location), context.radius, false]);
+                        updateInputValues(inputBinding, gmapContext);
                     });
+                    
+                    
                 });
             }
             if (inputBinding.longitudeInput) {
-                inputBinding.longitudeInput.on("change", function(e) {
-                    if (!e.originalEvent) { return }
+                inputBinding.longitudeInput.on("change", function(e, isInternal) {
+                    if (isInternal) { return }
                     GmUtility.setPosition(gmapContext, new google.maps.LatLng(gmapContext.location.lat(), $(this).val()), function(context){
                         context.settings.onchanged.apply(gmapContext.domContainer,
                             [GmUtility.locationFromLatLng(context.location), context.radius, false]);
+                        updateInputValues(inputBinding, gmapContext);
                     });
+                    
                 });
             }
         }
